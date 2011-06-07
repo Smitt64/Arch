@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>578</width>
+    <height>373</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>578</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="create"/>
+    <addaction name="open"/>
+    <addaction name="close"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Архив</string>
+    </property>
+    <addaction name="upDir"/>
+    <addaction name="separator"/>
+    <addaction name="add_file"/>
+    <addaction name="remove"/>
+    <addaction name="rename"/>
+    <addaction name="separator"/>
+    <addaction name="view_edit"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="create">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/new</normaloff>:/new</iconset>
+   </property>
+   <property name="text">
+    <string>Создать...</string>
+   </property>
+   <property name="toolTip">
+    <string>Создать архив</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="open">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/open</normaloff>:/open</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть...</string>
+   </property>
+   <property name="toolTip">
+    <string>Открыть архив</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="upDir">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/updir</normaloff>:/updir</iconset>
+   </property>
+   <property name="text">
+    <string>Перейти на каталог выше</string>
+   </property>
+   <property name="shortcut">
+    <string>Backspace</string>
+   </property>
+  </action>
+  <action name="close">
+   <property name="text">
+    <string>Закрыть</string>
+   </property>
+  </action>
+  <action name="add_file">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/addfile</normaloff>:/addfile</iconset>
+   </property>
+   <property name="text">
+    <string>Добавить файлы...</string>
+   </property>
+  </action>
+  <action name="remove">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/remfile</normaloff>:/remfile</iconset>
+   </property>
+   <property name="text">
+    <string>Удалить файл(ы)</string>
+   </property>
+  </action>
+  <action name="rename">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/rename</normaloff>:/rename</iconset>
+   </property>
+   <property name="text">
+    <string>Переименовать файл</string>
+   </property>
+  </action>
+  <action name="view_edit">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/viewedit</normaloff>:/viewedit</iconset>
+   </property>
+   <property name="text">
+    <string>Просмотр/Изменение</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

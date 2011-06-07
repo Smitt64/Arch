@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="document">res/Generic_Document.png</file>
+        <file alias="folder">res/foldergreen.png</file>
+        <file alias="root">res/EmptyDrive.png</file>
+        <file alias="rename">res/Rename.ico</file>
+        <file alias="new">res/DocumentHS.png</file>
+        <file alias="updir">res/GoToParentFolderHS.png</file>
+        <file alias="open">res/openHS.png</file>
+        <file alias="addfile">res/addfile.png</file>
+        <file alias="remfile">res/removefile.png</file>
+        <file alias="viewedit">res/EditCodeHS.png</file>
+    </qresource>
+</RCC>
