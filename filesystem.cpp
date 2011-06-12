@@ -3,6 +3,7 @@
 #include <qdebug.h>
 #include <QDataStream>
 #include <QObject>
+#include <QFileInfo>
 #include <qstringlist.h>
 
 FileSystem *FileSystem::m_pInstance = NULL;
@@ -309,27 +310,11 @@ QByteArray FileSystem::fsGetFile(QString name, FSHANDLE *handle)
     return qUncompress(data);
 }
 
-char *FileSystem::fsGetExstension(QString file)
+QString FileSystem::fsGetExstension(QString file)
 {
-    /*int size = 0;
-    for(int i = file.length() - 1; i > 0; i--)
-    {
-        if(file[i].toLatin1() == '.')
-            break;
-        size++;
-    }
-    int ch = size - 1;
-    char *name = new char[size - 1];
-    for(int i = file.length() - 1; i > (file.length() - size - 1); i--)
-    {
-        name[ch] = file[i].toLatin1();
-        ch--;
-    }
+    QFileInfo inf(file);
 
-    name[size] = '\0';*/
-    int pos = file.indexOf('.');
-
-    return file.right(file.length() - pos - 1).toLatin1().data();
+    return inf.extension();
 }
 
 void FileSystem::fsClose(FSHANDLE *handle)
