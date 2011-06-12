@@ -4,11 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui qt3support
 
 TARGET = ArchV2
 TEMPLATE = app
 
+OBJECTS_DIR = .build
+MOC_DIR = .build
+UI_DIR = .build
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -16,14 +19,16 @@ SOURCES += main.cpp\
     msstyle/windowsmodernstyle.cpp \
     contentview.cpp \
     filesviewwidget.cpp \
-    textview.cpp
+    textview.cpp \
+    listbuilder.cpp
 
 HEADERS  += mainwindow.h \
     filesystem.h \
     msstyle/windowsmodernstyle.h \
     contentview.h \
     filesviewwidget.h \
-    textview.h
+    textview.h \
+    listbuilder.h
 
 FORMS    += mainwindow.ui \
     contentview.ui \
@@ -31,5 +36,8 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     res.qrc
+
+TRANSLATIONS = arch_v2_ru.ts \
+                arch_v2_en.ts
 
 debug:DEFINES += FS_DEBUG
