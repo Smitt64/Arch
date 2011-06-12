@@ -22,17 +22,24 @@ ContentView::ContentView(QWidget *parent) :
 
     this->fileList = new FilesViewWidget(this);
     this->ui->horizontalLayout->addWidget(this->fileList);
+    this->watcher = new QFileSystemWatcher(&this->handle.file);
+
+    lBuilder = new ListBuilder(&this->handle);
+    lBuilder->setList(this->fileList);
 
     connect(this->fileList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onClickItem(QListWidgetItem*)));
     connect(this->fileList, SIGNAL(dragedFiles(const QMimeData*)), this, SLOT(onAddDragedFiles(const QMimeData*)));
     connect(this->fileList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(onEndEditFile(QListWidgetItem*)));
     connect(this->fileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onDoubleClick(QListWidgetItem*)));
     connect(this->ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onClickFolderTree(QTreeWidgetItem*,int)));
+    connect(this->watcher, SIGNAL(fileChanged(QString)), this, SLOT(archChangetWithout(QString)));
 }
 
 ContentView::~ContentView()
 {
     FileSystem::getInst()->fsClose(&this->handle);
+    delete this->watcher;
+    delete this->fileList;
     delete ui;
 }
 
@@ -44,6 +51,8 @@ bool ContentView::loadFile(const QString &fileName)
     {
         updateFileTree();
         FileSystem::getInst()->fsClose(&this->handle);
+
+        this->watcher->addPath(fileName);
     }
     else
         return false;
@@ -51,11 +60,20 @@ bool ContentView::loadFile(const QString &fileName)
     return true;
 }
 
+void ContentView::archChangetWithout(QString fName)
+{
+    //qDebug() << fName << this->currentFile();
+   // QMessageBox::information(this, tr("Information!"), tr("The archive has changed out of the program. Reload…"));
+    //this->updateFileTree();
+    //this->lBuilder->setCurrentFolder(this->currFolder);
+    //this->lBuilder->run();
+}
+
 void ContentView::setCurrentFile(const QString &fileName)
 {
     curFile = QFileInfo(fileName).canonicalFilePath();
 
-    this->setWindowTitle(curFile);
+    this->setWindowTitle(QFileInfo(fileName).fileName());
 }
 
 void ContentView::updateFileTree()
@@ -130,91 +148,10 @@ void ContentView::onClickFolderTree(QTreeWidgetItem *item, int column)
     this->updateFileList(text);
 }
 
-void ContentView::makeFileItem(QString text)
-{
-    QListWidgetItem *item = new QListWidgetItem;
-    QString ext = FileSystem::fsGetExstension(text);
-    ext = ext.toLower();
-    QString name = this->currFolder.remove("[ROOT]\\") + text;
-
-    item->setText(text);
-
-    QPixmap map(48, 48);
-    map.fill(Qt::transparent);
-
-    QPainter paint(&map);
-    paint.drawPixmap(-4, -6, 55, 55, QPixmap(":/document"));
-    paint.setPen(Qt::darkBlue);
-    paint.setFont(QFont("Times", 8, QFont::Bold));
-    paint.drawText(7, 10, ext);
-
-    paint.setPen(Qt::darkRed);
-    paint.drawLine(7, 12, 30, 12);
-
-    if(FileSystem::getInst()->fsOpen(&this->handle))
-    {
-        QPixmap map;
-        if(ext == "html" || ext == "htm")
-        {
-            QLabel *label = new QLabel;
-            label->setAutoFillBackground(false);
-            label->setText(QString(FileSystem::getInst()->fsGetFile(name, &this->handle)));
-            map = QPixmap::grabWidget(label);
-            paint.drawPixmap(QRect(7, 13, 33, 33), map, QRect(0, 0, 100, 100));
-        }
-        else if(ext == "bmp" || ext == "jpg" || ext == "jpeg" || ext == "png")
-        {
-            map.loadFromData(FileSystem::getInst()->fsGetFile(name, &this->handle));
-            paint.drawPixmap(QRect(7, 13, 33, 33), map);
-        }
-        else
-        {
-            QFont font("Arial");
-            font.setPointSizeF(5);
-            QString text = FileSystem::getInst()->fsGetFile(name, &this->handle);
-            paint.setFont(font);
-            paint.drawText(7, 13, 33, 33, Qt::AlignLeft, text);
-        }
-        FileSystem::getInst()->fsClose(&this->handle);
-    }
-
-    item->setIcon(QIcon(map));
-    item->setData(Qt::UserRole, 1);
-
-    this->fileList->addItem(item);
-}
-
 void ContentView::updateFileList(QString folder)
 {
-    this->fileList->clear();
-
-    if(FileSystem::getInst()->fsOpen(&this->handle))
-    {
-        QString buf = folder;
-
-        if(buf.contains("[ROOT]\\"))
-            buf.remove(0, 7);
-
-        QStringList folders = FileSystem::getInst()->fsGetFolders(buf, &this->handle);
-        QStringList files = FileSystem::getInst()->fsGetListFiles(buf, &this->handle);
-
-        for(int i = 0; i < folders.count(); i++)
-        {
-            QListWidgetItem *item = new QListWidgetItem;
-            item->setText(folders[i]);
-            item->setIcon(QIcon(":/folder"));
-            item->setData(Qt::UserRole, 0);
-
-            this->fileList->addItem(item);
-        }
-
-        for(int i = 0; i < files.count(); i++)
-        {
-            this->makeFileItem(files[i]);
-        }
-
-        FileSystem::getInst()->fsClose(&this->handle);
-    }
+    this->lBuilder->setCurrentFolder(folder);
+    this->lBuilder->run();
 }
 
 void ContentView::setCurrentFolder(QString folder)
@@ -275,27 +212,8 @@ void ContentView::onAddDragedFiles(const QMimeData *data)
         files += inf.fileName() + "\n";
     }
 
-    if(FileSystem::getInst()->fsOpen(&this->handle))
-    {
-        qDebug() << "add files" << list;
-        for(int i = 0; i < list.count(); i++)
-        {
-            QFileInfo inf(list[i].path().remove(0, 1));
-            qDebug() << inf.absoluteFilePath();
-
-            QString name = this->currFolder + inf.fileName();
-            name.remove("[ROOT]\\");
-            if(FileSystem::getInst()->fsAddFile(inf.absoluteFilePath(),
-                                             name.toLocal8Bit(),
-                                             &this->handle))
-                makeFileItem(inf.fileName());
-        }
-        FileSystem::getInst()->fsClose(&this->handle);
-    }
-    else
-        QMessageBox::critical(this, "Добавление файлов...", "Не уалось открыть архив для записи!");
-
-    this->fileList->sortItems();
+    this->lBuilder->setFiles(list);
+    this->lBuilder->run();
 }
 
 void ContentView::onClickItem(QListWidgetItem *item)

@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QList>
 #include <QUrl>
-#include <filesystem.h>
+#include <QFileSystemWatcher>
+#include "filesystem.h"
+#include "listbuilder.h"
 #include "filesviewwidget.h"
 
 namespace Ui {
@@ -48,9 +50,9 @@ private slots:
     void onAddDragedFiles(const QMimeData *data);
 
     void onClickItem(QListWidgetItem *item);
+    void archChangetWithout(QString fName);
 
 private:
-    void makeFileItem(QString text);
     void setCurrentFile(const QString &fileName);
     void updateFileList(QString folder = "");
     void selectTreeItemByPath(QString path);
@@ -62,6 +64,9 @@ private:
     QString oldFile;
     QList<QAction*> menuactions;
     Ui::ContentView *ui;
+    ListBuilder *lBuilder;
+    QFileSystemWatcher *watcher;
+    bool prAction;
 };
 
 #endif // CONTENTVIEW_H
