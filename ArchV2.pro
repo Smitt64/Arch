@@ -34,8 +34,7 @@ FORMS    += mainwindow.ui \
     contentview.ui \
     textview.ui
 
-RESOURCES += \
-    res.qrc
+RESOURCES += res.qrc
 
 TRANSLATIONS = arch_v2_ru.ts \
                 arch_v2_en.ts
