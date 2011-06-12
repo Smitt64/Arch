@@ -27,7 +27,7 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>Файл</string>
+     <string>File</string>
     </property>
     <addaction name="create"/>
     <addaction name="open"/>
@@ -35,7 +35,7 @@
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>Архив</string>
+     <string>Archive</string>
     </property>
     <addaction name="upDir"/>
     <addaction name="separator"/>
@@ -45,7 +45,15 @@
     <addaction name="separator"/>
     <addaction name="view_edit"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionStandart"/>
+    <addaction name="actionArchive"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menuView"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -63,10 +71,10 @@
      <normaloff>:/new</normaloff>:/new</iconset>
    </property>
    <property name="text">
-    <string>Создать...</string>
+    <string>New...</string>
    </property>
    <property name="toolTip">
-    <string>Создать архив</string>
+    <string>Creating new archive...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -78,10 +86,10 @@
      <normaloff>:/open</normaloff>:/open</iconset>
    </property>
    <property name="text">
-    <string>Открыть...</string>
+    <string>Open...</string>
    </property>
    <property name="toolTip">
-    <string>Открыть архив</string>
+    <string>Open archive...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -93,7 +101,7 @@
      <normaloff>:/updir</normaloff>:/updir</iconset>
    </property>
    <property name="text">
-    <string>Перейти на каталог выше</string>
+    <string>To pass to the folder above</string>
    </property>
    <property name="shortcut">
     <string>Backspace</string>
@@ -101,7 +109,10 @@
   </action>
   <action name="close">
    <property name="text">
-    <string>Закрыть</string>
+    <string>Close</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the archive</string>
    </property>
   </action>
   <action name="add_file">
@@ -110,7 +121,10 @@
      <normaloff>:/addfile</normaloff>:/addfile</iconset>
    </property>
    <property name="text">
-    <string>Добавить файлы...</string>
+    <string>Add files</string>
+   </property>
+   <property name="toolTip">
+    <string>Add files to archive</string>
    </property>
   </action>
   <action name="remove">
@@ -119,7 +133,10 @@
      <normaloff>:/remfile</normaloff>:/remfile</iconset>
    </property>
    <property name="text">
-    <string>Удалить файл(ы)</string>
+    <string>Remove files</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove files from archive</string>
    </property>
   </action>
   <action name="rename">
@@ -128,7 +145,7 @@
      <normaloff>:/rename</normaloff>:/rename</iconset>
    </property>
    <property name="text">
-    <string>Переименовать файл</string>
+    <string>Rename file</string>
    </property>
   </action>
   <action name="view_edit">
@@ -137,7 +154,23 @@
      <normaloff>:/viewedit</normaloff>:/viewedit</iconset>
    </property>
    <property name="text">
-    <string>Просмотр/Изменение</string>
+    <string>Viewing/change</string>
+   </property>
+  </action>
+  <action name="actionStandart">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Standart</string>
+   </property>
+  </action>
+  <action name="actionArchive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Archive</string>
    </property>
   </action>
  </widget>

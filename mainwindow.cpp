@@ -4,9 +4,10 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QSignalMapper>
-#include <contentview.h>
+#include "contentview.h"
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QPushButton>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -26,7 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         tab->setTabsClosable(true);
     }*/
-    archBar = this->addToolBar("Архив");
+    archBar = this->addToolBar(tr("Archive"));
+    archBar->setWindowIcon(QIcon(":/root"));
 
     curFolder = new QLabel;
     curFolder->setMinimumWidth(150);
@@ -36,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->statusBar->addWidget(this->curFolder);
     this->ui->statusBar->addWidget(this->selected);
 
+    this->ui->mainToolBar->setWindowTitle(tr("Standart"));
     this->ui->mainToolBar->addAction(this->ui->create);
     this->ui->mainToolBar->addAction(this->ui->open);
     this->ui->mainToolBar->addAction(this->ui->close);
@@ -55,6 +58,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->remove, SIGNAL(triggered()), this, SLOT(removeFiles()));
     connect(this->ui->view_edit, SIGNAL(triggered()), this, SLOT(viewedit()));
     connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateActions()));
+
+    connect(this->ui->mainToolBar, SIGNAL(visibilityChanged(bool)), this, SLOT(toolBarVisibitity(bool)));
+    connect(archBar, SIGNAL(visibilityChanged(bool)), this, SLOT(toolBarVisibitity(bool)));
+
+    connect(this->ui->actionStandart, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
+    connect(this->ui->actionArchive, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
 
     this->setAutoFillBackground(false);
 }
@@ -116,9 +125,6 @@ void MainWindow::open()
         else
             child->close();
      }
-    /*ContentView *child = createMdiChild();
-    if(child->loadFile("D:/ArchV2/debug/test.tst"))
-        child->showMaximized();*/
 }
 
 ContentView *MainWindow::createMdiChild()
@@ -129,10 +135,6 @@ ContentView *MainWindow::createMdiChild()
 
     connect(child, SIGNAL(currentFolderChanged(QString)), this, SLOT(setCurFolder(QString)));
     connect(child, SIGNAL(fileSelected(QString)), this, SLOT(setCurFile(QString)));
-    /*connect(child, SIGNAL(copyAvailable(bool)),
-                 cutAct, SLOT(setEnabled(bool)));
-         connect(child, SIGNAL(copyAvailable(bool)),
-                 copyAct, SLOT(setEnabled(bool)));*/
 
     return child;
 }
@@ -153,6 +155,15 @@ void MainWindow::setCurFolder(QString text)
 void MainWindow::updateActions()
 {
     bool hasMdiChild = (activeMdiChild() != 0);
+
+    QString caption;
+    if(hasMdiChild)
+    {
+        caption = activeMdiChild()->windowTitle();
+        this->setWindowTitle(QString("MyArchiver - %1").arg(caption));
+    }
+    else
+        this->setWindowTitle(QString("MyArchiver"));
 
     this->ui->close->setEnabled(hasMdiChild);
     this->ui->add_file->setEnabled(hasMdiChild);
@@ -180,4 +191,24 @@ void MainWindow::viewedit()
     {
         activeMdiChild()->viewEdit();
     }
+}
+
+void MainWindow::toolBarVisibitity(bool value)
+{
+    QWidget *w = (QWidget*)this->sender();
+    QList<QAction*> list = this->ui->menuView->actions();
+    for(int i = 0; i < list.count(); i++)
+        if(list[i]->text() == w->windowTitle())
+            list[i]->setChecked(value);
+}
+
+void MainWindow::toolBarVisTriggered(bool value)
+{
+    QAction *w = (QAction*)this->sender();
+
+    if(w->text() == this->ui->mainToolBar->windowTitle())
+        this->ui->mainToolBar->setVisible(value);
+
+    if(w->text() == this->archBar->windowTitle())
+        this->archBar->setVisible(value);
 }

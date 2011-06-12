@@ -31,6 +31,9 @@ private slots:
     void removeFiles();
     void viewedit();
 
+    void toolBarVisibitity(bool value);
+    void toolBarVisTriggered(bool value);
+
 private:
     ContentView *activeMdiChild();
     QMdiSubWindow *findMdiChild(const QString &fileName);
