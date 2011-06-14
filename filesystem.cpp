@@ -549,3 +549,8 @@ QStringList FileSystem::fsGetFileNamesList(FSHANDLE *handle)
 
     return list;
 }
+
+bool FileSystem::fsIsOpen(FSHANDLE *handle)
+{
+    return handle->file.isOpen();
+}

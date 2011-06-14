@@ -49,6 +49,9 @@ public:
     //Закрыть архив
     void fsClose(FSHANDLE *handle);
 
+    //Архив открыт?
+    bool fsIsOpen(FSHANDLE *handle);
+
     //Добавить файл в архив
     bool fsAddFile(QString source, QString name, FSHANDLE *handle, int compressLevel = 2);
     bool fsAddFile(QByteArray data, QString name, FSHANDLE *handle, int compressLevel = 2);
@@ -84,7 +87,7 @@ public:
     //Выделяет имя файла из пути имя файла
     static char *fsGetFName(QString fileName);
     //Возвращает расширение файла
-    static char *fsGetExstension(QString file);
+    static QString fsGetExstension(QString file);
 
     //Возвращает список каталогов, находящихся в указаном каталоге
     QStringList fsGetFolders(QString parent, FSHANDLE *handle);
