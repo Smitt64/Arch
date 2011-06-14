@@ -10,6 +10,8 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(codec);
 
     QApplication a(argc, argv);
+    a.setOrganizationName("Smitt64");
+    a.setApplicationName("MyArchiver");
     a.setStyle("windowsmodernstyle");
 
     MainWindow w;
