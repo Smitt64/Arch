@@ -22,7 +22,7 @@ ContentView::ContentView(QWidget *parent) :
 
     this->fileList = new FilesViewWidget(this);
     this->ui->horizontalLayout->addWidget(this->fileList);
-    this->watcher = new QFileSystemWatcher(&this->handle.file);
+    this->watcher = new QFileSystemWatcher(qApp);
 
     lBuilder = new ListBuilder(&this->handle);
     lBuilder->setList(this->fileList);
@@ -62,11 +62,15 @@ bool ContentView::loadFile(const QString &fileName)
 
 void ContentView::archChangetWithout(QString fName)
 {
-    //qDebug() << fName << this->currentFile();
-   // QMessageBox::information(this, tr("Information!"), tr("The archive has changed out of the program. Reload…"));
-    //this->updateFileTree();
-    //this->lBuilder->setCurrentFolder(this->currFolder);
-    //this->lBuilder->run();
+    if(!this->prAction)
+    {
+        this->prAction = false;
+        QMessageBox::information(this, tr("Information!"),
+                                 tr("The archive has changed out of the program. Reload…"));
+        this->updateFileTree();
+        this->lBuilder->setCurrentFolder(this->currFolder);
+        this->lBuilder->run();
+    }
 }
 
 void ContentView::setCurrentFile(const QString &fileName)
@@ -78,17 +82,17 @@ void ContentView::setCurrentFile(const QString &fileName)
 
 void ContentView::updateFileTree()
 {
-    if(this->ui->treeWidget->topLevelItemCount() != 0)
-        this->ui->treeWidget->clear();
-    QTreeWidgetItem *rootItem = new QTreeWidgetItem(0);
+    this->ui->treeWidget->clear();
+
+    QTreeWidgetItem *rootItem = new QTreeWidgetItem(this->ui->treeWidget);
     rootItem->setText(0, "[ROOT]");
     rootItem->setIcon(0, QIcon(":/root"));
 
-    this->ui->treeWidget->addTopLevelItem(rootItem);
-
+    FileSystem::getInst()->fsOpen(&this->handle);
     for(int i = 0; i < this->handle.dataHeader->m_pFileCount; i++)
     {
         QString file(this->handle.fileList[i].m_pName);
+
         QTreeWidgetItem *hFolder = rootItem;
         QStringList list = file.split('\\');
 
@@ -97,6 +101,7 @@ void ContentView::updateFileTree()
             hFolder = this->addItem(list[j], hFolder);
         }
     }
+    FileSystem::getInst()->fsClose(&this->handle);
 
     this->ui->treeWidget->sortItems(0, Qt::AscendingOrder);
 }
@@ -117,10 +122,10 @@ QTreeWidgetItem *ContentView::addItem(QString lpszItem, QTreeWidgetItem *hRoot)
     //Åñëè íå ñóùåñòâóåò ñîçäàòü
     if(!hChild)
     {
-        hChild = new QTreeWidgetItem();
+        hChild = new QTreeWidgetItem(hRoot);
         hChild->setText(0, lpszItem);
         hChild->setIcon(0, QIcon(":/folder"));
-        hRoot->addChild(hChild);
+        //hRoot->addChild(hChild);
     }
 
     return hChild;
@@ -212,6 +217,7 @@ void ContentView::onAddDragedFiles(const QMimeData *data)
         files += inf.fileName() + "\n";
     }
 
+    this->prAction = true;
     this->lBuilder->setFiles(list);
     this->lBuilder->run();
 }
@@ -292,6 +298,7 @@ void ContentView::removeFiles()
                 QString folder = this->currFolder.remove("[ROOT]\\");
                 QStringList f = FileSystem::getInst()->fsGetFileNamesList(&this->handle);
 
+                this->prAction = true;
                 for(int i = 0; i < list.count(); i++)
                 {
                     if(list[i]->data(Qt::UserRole).toInt() == 0)
@@ -327,6 +334,7 @@ void ContentView::viewEdit()
 
         if(dlg.exec() == QDialog::Accepted)
         {
+            this->prAction = true;
             FileSystem::getInst()->fsRewriteFile(dlg.getText(), fname, &this->handle, 2);
         }
         FileSystem::getInst()->fsClose(&this->handle);
