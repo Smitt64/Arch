@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QPushButton>
+#include <QSettings>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -21,12 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     mdiArea->setViewMode(QMdiArea::TabbedView);
     this->setCentralWidget(this->mdiArea);
 
+
     windowMapper = new QSignalMapper(this);
 
-    /*foreach(QTabBar* tab, mdiArea->findChildren())
-    {
-        tab->setTabsClosable(true);
-    }*/
     archBar = this->addToolBar(tr("Archive"));
     archBar->setWindowIcon(QIcon(":/root"));
 
@@ -34,6 +32,24 @@ MainWindow::MainWindow(QWidget *parent) :
     curFolder->setMinimumWidth(150);
     curFolder->setTextInteractionFlags(Qt::TextSelectableByMouse);
     selected = new QLabel;
+
+    ////////////////////////////////////////////////////////////////
+    this->exitAction = new QAction(tr("Exit"), this);
+    this->recentFileActs.clear();
+    for (int i = 0; i < maxRecentFiles; ++i)
+    {
+        recentFileActs.push_back(new QAction(this));
+        recentFileActs[i]->setVisible(false);
+        connect(recentFileActs[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
+    }
+
+    separatorAct = this->ui->menu->addSeparator();
+    for (int i = 0; i < maxRecentFiles; ++i)
+        this->ui->menu->addAction(recentFileActs[i]);
+    this->ui->menu->addSeparator();
+    this->ui->menu->addAction(this->exitAction);
+    updateRecentFileActions();
+    ////////////////////////////////////////////////////////////////
 
     this->ui->statusBar->addWidget(this->curFolder);
     this->ui->statusBar->addWidget(this->selected);
@@ -61,11 +77,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this->ui->mainToolBar, SIGNAL(visibilityChanged(bool)), this, SLOT(toolBarVisibitity(bool)));
     connect(archBar, SIGNAL(visibilityChanged(bool)), this, SLOT(toolBarVisibitity(bool)));
+    connect(this->exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     connect(this->ui->actionStandart, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
     connect(this->ui->actionArchive, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
 
     this->setAutoFillBackground(false);
+}
+
+void MainWindow::openRecentFile()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    if(action)
+        open(action->data().toString());
 }
 
 MainWindow::~MainWindow()
@@ -103,28 +127,41 @@ QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName)
     return NULL;
 }
 
+void MainWindow::open(QString fileName)
+{
+    QMdiSubWindow *existing = findMdiChild(fileName);
+    if(existing)
+    {
+        mdiArea->setActiveSubWindow(existing);
+        return;
+    }
+
+    ContentView *child = createMdiChild();
+    if(child->loadFile(fileName))
+    {
+        child->show();
+        child->setCurrentFolder("[ROOT]\\");
+        this->curFolder->setText("[ROOT]\\");
+
+        QSettings settings;
+        QStringList files = settings.value("recentFileList").toStringList();
+        files.removeAll(fileName);
+        files.prepend(fileName);
+        while (files.size() > maxRecentFiles)
+            files.removeLast();
+
+        settings.setValue("recentFileList", files);
+        this->updateRecentFileActions();
+    }
+    else
+        child->close();
+}
+
 void MainWindow::open()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
     if(!fileName.isEmpty())
-    {
-        QMdiSubWindow *existing = findMdiChild(fileName);
-        if(existing)
-        {
-            mdiArea->setActiveSubWindow(existing);
-            return;
-        }
-
-        ContentView *child = createMdiChild();
-        if(child->loadFile(fileName))
-        {
-            child->show();
-            child->setCurrentFolder("[ROOT]\\");
-            this->curFolder->setText("[ROOT]\\");
-        }
-        else
-            child->close();
-     }
+        this->open(fileName);
 }
 
 ContentView *MainWindow::createMdiChild()
@@ -170,6 +207,23 @@ void MainWindow::updateActions()
     this->ui->remove->setEnabled(hasMdiChild);
     this->ui->rename->setEnabled(hasMdiChild);
     this->ui->upDir->setEnabled(hasMdiChild);
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)maxRecentFiles);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = tr("&%1 %2").arg(i + 1).arg(QFileInfo(files[i]).fileName());
+        recentFileActs[i]->setText(text);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < maxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
 }
 
 void MainWindow::setCurFile(QString name)
