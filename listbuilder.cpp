@@ -160,7 +160,7 @@ void ListBuilder::run()
                     this->list->addItem(this->makeItem(inf.fileName()));
                 this->progress->setValue(i);
             }
-            this->progress->setMaximum(this->customFiles.count());
+            this->progress->setValue(this->customFiles.count());
             FileSystem::getInst()->fsClose(this->handle);
         }
         else
