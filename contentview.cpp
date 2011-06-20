@@ -340,3 +340,18 @@ void ContentView::viewEdit()
         FileSystem::getInst()->fsClose(&this->handle);
     }
 }
+
+void ContentView::onClose()
+{
+    FileSystem::getInst()->fsClose(&this->handle);
+    this->ui->treeWidget->clear();
+    this->fileList->clear();
+    this->currFolder = "";
+    this->curFile = "";
+
+    delete this->ui->treeWidget;
+    delete this->fileList;
+
+    this->ui->treeWidget = NULL;
+    this->fileList = NULL;
+}

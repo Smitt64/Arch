@@ -22,7 +22,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mdiArea->setViewMode(QMdiArea::TabbedView);
     this->setCentralWidget(this->mdiArea);
 
-
     windowMapper = new QSignalMapper(this);
 
     archBar = this->addToolBar(tr("Archive"));
@@ -81,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this->ui->actionStandart, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
     connect(this->ui->actionArchive, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
+    connect(this->ui->close, SIGNAL(triggered()), this, SLOT(onClose()));
 
     this->setAutoFillBackground(false);
 }
@@ -152,6 +152,8 @@ void MainWindow::open(QString fileName)
 
         settings.setValue("recentFileList", files);
         this->updateRecentFileActions();
+
+        this->ui->close->setEnabled(true);
     }
     else
         child->close();
@@ -265,4 +267,13 @@ void MainWindow::toolBarVisTriggered(bool value)
 
     if(w->text() == this->archBar->windowTitle())
         this->archBar->setVisible(value);
+}
+
+void MainWindow::onClose()
+{
+    if(activeMdiChild())
+    {
+        activeMdiChild()->onClose();
+        this->mdiArea->closeActiveSubWindow();
+    }
 }

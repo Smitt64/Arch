@@ -39,6 +39,7 @@ public slots:
     void cdUp();
     void removeFiles();
     void viewEdit();
+    void onClose();
 
 private slots:
     void open(QString fname);

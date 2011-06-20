@@ -36,6 +36,8 @@ private slots:
     void openRecentFile();
     void updateRecentFileActions();
 
+    void onClose();
+
     void toolBarVisibitity(bool value);
     void toolBarVisTriggered(bool value);
 
