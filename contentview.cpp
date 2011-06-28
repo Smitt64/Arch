@@ -34,6 +34,7 @@ ContentView::ContentView(QWidget *parent) :
     connect(this->fileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onDoubleClick(QListWidgetItem*)));
     connect(this->ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onClickFolderTree(QTreeWidgetItem*,int)));
     connect(this->watcher, SIGNAL(fileChanged(QString)), this, SLOT(archChangetWithout(QString)));
+    connect(this->fileList, SIGNAL(deleteFile()), this, SLOT(removeFiles()));
 }
 
 ContentView::~ContentView()

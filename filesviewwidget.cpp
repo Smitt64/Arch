@@ -77,4 +77,8 @@ void FilesViewWidget::keyPressEvent(QKeyEvent *event)
     {
         this->closePersistentEditor(this->currentItem());
     }
+    else if(event->key() == Qt::Key_Delete)
+    {
+        emit deleteFile();
+    }
 }

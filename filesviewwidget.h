@@ -11,6 +11,7 @@ public:
 
 signals:
     void dragedFiles(const QMimeData*);
+    void deleteFile();
 
 public slots:
 
