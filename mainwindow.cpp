@@ -9,6 +9,9 @@
 #include <QFileInfo>
 #include <QPushButton>
 #include <QSettings>
+#include <QtXml>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -81,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->actionStandart, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
     connect(this->ui->actionArchive, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
     connect(this->ui->close, SIGNAL(triggered()), this, SLOT(onClose()));
+
+    connect(this->ui->actionMake_archive, SIGNAL(triggered()), this, SLOT(makeArchive()));
 
     this->setAutoFillBackground(false);
 }
@@ -209,6 +214,7 @@ void MainWindow::updateActions()
     this->ui->remove->setEnabled(hasMdiChild);
     this->ui->rename->setEnabled(hasMdiChild);
     this->ui->upDir->setEnabled(hasMdiChild);
+    this->ui->view_edit->setEnabled(hasMdiChild);
 }
 
 void MainWindow::updateRecentFileActions()
@@ -275,5 +281,101 @@ void MainWindow::onClose()
     {
         activeMdiChild()->onClose();
         this->mdiArea->closeActiveSubWindow();
+    }
+}
+
+void MainWindow::makeArchive()
+{
+    QDomDocument doc;
+    QString file = QFileDialog::getOpenFileName(this, tr("To open a tincture file..."), "",
+                                                tr("XML files (*.xml)"));
+
+    if(!file.isEmpty())
+    {
+        QString saveAs = QFileDialog::getSaveFileName(this, tr("Create archive..."));
+
+        if(saveAs.isEmpty())
+            return;
+
+        QFile content(file);
+        if(!content.open(QIODevice::ReadOnly))
+        {
+            QMessageBox::critical(this, tr("Error!"), tr("It was not possible to open a file of options!"));
+            return;
+        }
+
+        if(!doc.setContent(&content))
+        {
+            QMessageBox::critical(this, tr("Error!"), tr("Error of analysis of a file of options!"));
+            content.close();
+            return;
+        }
+        content.close();
+
+        QDomElement docElem = doc.documentElement();
+
+        if(docElem.tagName() != "archive")
+        {
+            QMessageBox::critical(this, tr("Error!"), tr("Not valid structure!"));
+            return;
+        }
+
+        QProgressDialog progress(this);
+        progress.setWindowModality(Qt::WindowModal);
+
+        int count = docElem.childNodes().count();
+        progress.setMaximum(count);
+
+        FSHANDLE *fsHandle = new FSHANDLE;
+        FileSystem::getInst()->fsCreate(saveAs, fsHandle);
+
+        QDomNode n = docElem.firstChild();
+        while(!n.isNull())
+        {
+             QDomElement e = n.toElement();
+
+             if(e.tagName() == "file")
+             {
+                QFileInfo inf(e.text());
+                bool directory = (bool)e.attribute("directory", "0").toInt();
+                QString pref = e.attribute("pref", "");
+
+                if(directory)
+                {
+                    QDir dir(e.text());
+                    QStringList files;
+                    files = dir.entryList(QStringList((e.attribute("filter", "*.*"))),
+                                                 QDir::Files | QDir::NoSymLinks);
+                    progress.setMaximum(progress.maximum() + files.count());
+
+                    for(int i = 0; i < files.count(); i++)
+                    {
+                        qDebug() << files[i];
+                        inf.setFile(files[i]);
+                        FileSystem::getInst()->fsAddFile(e.text() + files[i], pref + inf.fileName(), fsHandle);
+                        progress.setValue(progress.value() + 1);
+                        qApp->processEvents();
+                    }
+                }
+                else
+                {
+                    QString alias = e.attribute("alias", QString::null);
+                    progress.setLabelText(inf.fileName());
+
+                    qApp->processEvents();
+                    FileSystem::getInst()->fsAddFile(e.text(), pref + (alias.isNull() ? inf.fileName() : alias),
+                                                    fsHandle);
+                }
+             }
+             n = n.nextSibling();
+
+             progress.setValue(progress.value() + 1);
+        }
+        FileSystem::getInst()->fsClose(fsHandle);
+        delete fsHandle;
+        fsHandle = NULL;
+        progress.setValue(count);
+
+        open(saveAs);
     }
 }
