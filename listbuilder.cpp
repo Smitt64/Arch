@@ -95,6 +95,16 @@ void ListBuilder::setFiles(QList<QUrl> list)
     this->custom = true;
 }
 
+void ListBuilder::setFiles(QStringList list)
+{
+    this->customFiles.clear();
+    for(int i = 0; i < list.count(); i++)
+    {
+        this->customFiles.append(list[i]);
+    }
+    this->custom = true;
+}
+
 void ListBuilder::run()
 {
     if(!custom)
@@ -146,25 +156,25 @@ void ListBuilder::run()
     {
         this->progress->setWindowTitle(tr("Addition files..."));
         this->progress->setMaximum(this->customFiles.count());
-
-        if(FileSystem::getInst()->fsOpen(this->handle))
+        for(int i = 0; i < this->customFiles.count(); i++)
         {
-            for(int i = 0; i < this->customFiles.count(); i++)
+            if(FileSystem::getInst()->fsOpen(this->handle))
             {
                 QFileInfo inf(this->customFiles[i]);
                 QString name = this->currFolder + inf.fileName();
                 name.remove("[ROOT]\\");
                 if(FileSystem::getInst()->fsAddFile(inf.absoluteFilePath(),
-                                                 name.toLocal8Bit(),
-                                                 this->handle))
+                                                    name.toLocal8Bit(),
+                                                    this->handle))
                     this->list->addItem(this->makeItem(inf.fileName()));
                 this->progress->setValue(i);
+
+                this->progress->setValue(this->customFiles.count());
+                FileSystem::getInst()->fsClose(this->handle);
             }
-            this->progress->setValue(this->customFiles.count());
-            FileSystem::getInst()->fsClose(this->handle);
+            else
+                QMessageBox::critical(this->list, tr("Error!"), tr("Can't open archive!"));
         }
-        else
-            QMessageBox::critical(this->list, tr("Error!"), tr("Can't open archive!"));
 
         this->custom = false;
     }

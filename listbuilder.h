@@ -13,6 +13,7 @@ public:
     ListBuilder(FSHANDLE *arch, QObject *parent = 0);
     void setList(QListWidget *value);
     void setFiles(QList<QUrl> list);
+    void setFiles(QStringList list);
     void run();
 
 signals:
