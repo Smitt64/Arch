@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this->ui->actionStandart, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
     connect(this->ui->actionArchive, SIGNAL(triggered(bool)), this, SLOT(toolBarVisTriggered(bool)));
+    connect(this->ui->add_file, SIGNAL(triggered()), this, SLOT(addFiles()));
     connect(this->ui->close, SIGNAL(triggered()), this, SLOT(onClose()));
 
     connect(this->ui->actionMake_archive, SIGNAL(triggered()), this, SLOT(makeArchive()));
@@ -244,6 +245,14 @@ void MainWindow::removeFiles()
     if(activeMdiChild())
     {
         activeMdiChild()->removeFiles();
+    }
+}
+
+void MainWindow::addFiles()
+{
+    if(activeMdiChild())
+    {
+        activeMdiChild()->addFiles();
     }
 }
 

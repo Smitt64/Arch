@@ -39,6 +39,7 @@ public slots:
     void cdUp();
     void removeFiles();
     void viewEdit();
+    void addFiles();
     void onClose();
 
 private slots:

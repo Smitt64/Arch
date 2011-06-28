@@ -32,11 +32,14 @@ private slots:
     void setCurFile(QString name);
     void upFolder();
     void removeFiles();
+    void addFiles();
     void viewedit();
     void openRecentFile();
     void updateRecentFileActions();
 
     void onClose();
+
+    void makeArchive();
 
     void toolBarVisibitity(bool value);
     void toolBarVisTriggered(bool value);

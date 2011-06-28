@@ -11,6 +11,7 @@
 #include <QMimeData>
 #include "textview.h"
 #include <QProgressDialog>
+#include <QFileDialog>
 #include "ui_contentview.h"
 
 ContentView::ContentView(QWidget *parent) :
@@ -354,4 +355,17 @@ void ContentView::onClose()
 
     this->ui->treeWidget = NULL;
     this->fileList = NULL;
+}
+
+void ContentView::addFiles()
+{
+    QStringList files = QFileDialog::getOpenFileNames(this, tr("Adding files..."));
+
+    int count = files.count();
+    if(count)
+    {
+        this->lBuilder->setCurrentFolder(this->currFolder);
+        this->lBuilder->setFiles(files);
+        this->lBuilder->run();
+    }
 }
